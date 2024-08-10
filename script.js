@@ -174,5 +174,28 @@ function genCube(x, y, z, size) {
 
 let shapePoints = new Shape3D(genCube(100, 100, 100, 100));
 
-let newPoints = definePolygon2D(shapePoints, 0);
-console.log(newPoints);
+mainCanvas.addEventListener("click", function(event) {
+    let rect = mainCanvas.getBoundingClientRect();
+    let mouse = new Vector2D(event.clientX - rect.left, event.clientY - rect.top);
+    
+    shapePoints.points.push(new Vector3D(mouse.x, mouse.y, 0));
+    let newPoints = definePolygon2D(shapePoints, 0);
+
+    paint.fillStyle = "white";
+    paint.fillRect(0, 0, 1600, 1600);
+
+    paint.fillStyle = "black";
+    for(let i = 0;i<shapePoints.points.length;i++) {
+        paint.beginPath();
+        paint.arc(shapePoints.points[i].x, shapePoints.points[i].y, 5, 0, 2 * Math.PI);
+        paint.fill();
+    }
+
+    paint.beginPath();
+    paint.moveTo(newPoints[0].x, newPoints[0].y);
+    for(let i = 1;i<newPoints.length;i++) {
+        paint.lineTo(newPoints[i].x, newPoints[i].y);
+    }
+    paint.lineTo(newPoints[0].x, newPoints[0].y);
+    paint.stroke();
+});
