@@ -56,39 +56,6 @@ function definePolygon2D(shape3D, direction) {
     }
 
     let listOuterPoints = [farthestPoint];
-    //let currentPoint = 0;
-
-    // while(true) {
-    //     let endRound = true;
-
-    //     for(let i = 0;i<points2D.length;i++) {
-    //         if(i==listOuterPoints[currentPoint]) {continue}
-
-    //         for(let j = 0;j<points2D.length;j++) {
-    //             if(j==listOuterPoints[currentPoint] || j==i){continue}
-    //             let measure = calculateAngle(points2D[listOuterPoints[currentPoint]], points2D[i], points2D[j]);
-    //             let tester = new Vector2D(points2D[i].x - points2D[listOuterPoints[currentPoint]].x, points2D[i].y - points2D[listOuterPoints[currentPoint]].y);
-
-    //             let mainBool = tester.x <= 0 && tester.y > 0 || tester.x < 0;
-    //             let pointUnderLineBool = pointUnderLine(points2D[j], tester);
-    //             if(pointUnderLineBool||!(mainBool||pointUnderLineBool)) {
-    //                 measure = 360 - measure;
-    //             }
-
-    //             console.log(measure);
-
-    //             if(measure <= 180) {break}
-    //             endRound = false;
-
-    //             if(j == points2D.length - 1) {
-    //                 listOuterPoints.push(i);
-    //                 currentPoint++;
-    //             }
-    //         }
-    //     }
-    //     break;
-    //     if(endRound) {break}
-    // }
 
     for(let i = 0;i<listOuterPoints.length;i++) {
         let checkPoint = new Vector2D(2 * points2D[listOuterPoints[i]].x - averagePoint.x, 2 * points2D[listOuterPoints[i]].y - averagePoint.y);
@@ -100,23 +67,19 @@ function definePolygon2D(shape3D, direction) {
             if(j==listOuterPoints[i]) {continue}
 
             let measure = calculateAngle(checkPoint, points2D[listOuterPoints[i]], points2D[j]);
-            let slope = new Vector2D(points2D[listOuterPoints[i]].x - checkPoint.x, points2D[listOuterPoints[i]].y - checkPoint.y);
+            let checkLine = new Vector2D(points2D[listOuterPoints[i]].x - checkPoint.x, points2D[listOuterPoints[i]].y - checkPoint.y);
+            let finalCheckPoint = new Vector2D(points2D[j].x - checkPoint.x, points2D[j].y - checkPoint.y);
 
-            //let mainBool = tester.x <= 0 && tester.y > 0 || tester.x < 0;
-            let pointUnderLineBool = pointUnderLine(points2D[j], slope, checkPoint);
-            if(pointUnderLineBool) {
-                console.log("yes");
+            let crossProduct = checkLine.x * finalCheckPoint.y - checkLine.y * finalCheckPoint.x;
+            if(crossProduct>0) {
                 measure = 360 - measure;
             }
-
-            console.log(measure);
 
             if(smallestAngle>measure) {
                 smallestAngle = measure;
                 smallestAnglePoint = j;
             }
         }
-        console.log("");
 
         if(!regularContains(listOuterPoints, smallestAnglePoint)) {
             listOuterPoints.push(smallestAnglePoint);
