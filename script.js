@@ -63,7 +63,9 @@ function definePolygon2D(shape3D, direction) {
                 let measure = calculateAngle(listOuterPoints[currentPoint], points2D[i], points2D[j]);
                 let tester = new Vector2D(points2D[i].x - listOuterPoints[currentPoint].x, points2D[i].y - listOuterPoints[currentPoint].y);
 
-                if(tester.x <= 0 && tester.y > 0 || tester.x < 0) {
+                let mainBool = tester.x <= 0 && tester.y > 0 || tester.x < 0;
+                let pointUnderLineBool = pointUnderLine(points2D[j], tester);
+                if(pointUnderLineBool||!(mainBool||pointUnderLineBool)) {
                     measure = 360 - measure;
                 }
 
@@ -131,4 +133,11 @@ function calculateAngle(point1, point2, point3) {
     let angle = Math.acos((a*a + b*b - c*c) / (2 * a * b));
     
     return angle;
+}
+
+function pointUnderLine(point, line) {
+    if(line.x==0){return point.x < 0}
+    if(point.x==0){return point.y < 0}
+
+    return  line.y/line.x*point.x>point.y;
 }
