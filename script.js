@@ -21,6 +21,12 @@ class Vector3D extends Vector2D {
     }
 }
 
+class Shape3D {
+    constructor(points) {
+        this.points = points;
+    }
+}
+
 //Finds a 2D polygon given a set of 3D points and the direction to project them
 function definePolygon2D(shape3D, direction) {
     //Given the scope of the project only requires two types of projections, direction will either be a 1 or a 0
@@ -50,40 +56,80 @@ function definePolygon2D(shape3D, direction) {
     }
 
     let listOuterPoints = [farthestPoint];
-    let currentPoint = 0;
+    //let currentPoint = 0;
 
-    while(true) {
-        let endRound = true;
+    // while(true) {
+    //     let endRound = true;
 
-        for(let i = 0;i<points2D.length;i++) {
-            if(i==listOuterPoints[currentPoint]) {continue}
+    //     for(let i = 0;i<points2D.length;i++) {
+    //         if(i==listOuterPoints[currentPoint]) {continue}
 
-            for(let j = 0;j<points2D.length;j++) {
-                if(j==listOuterPoints[currentPoint] || j==i){continue}
-                let measure = calculateAngle(listOuterPoints[currentPoint], points2D[i], points2D[j]);
-                let tester = new Vector2D(points2D[i].x - listOuterPoints[currentPoint].x, points2D[i].y - listOuterPoints[currentPoint].y);
+    //         for(let j = 0;j<points2D.length;j++) {
+    //             if(j==listOuterPoints[currentPoint] || j==i){continue}
+    //             let measure = calculateAngle(points2D[listOuterPoints[currentPoint]], points2D[i], points2D[j]);
+    //             let tester = new Vector2D(points2D[i].x - points2D[listOuterPoints[currentPoint]].x, points2D[i].y - points2D[listOuterPoints[currentPoint]].y);
 
-                let mainBool = tester.x <= 0 && tester.y > 0 || tester.x < 0;
-                let pointUnderLineBool = pointUnderLine(points2D[j], tester);
-                if(pointUnderLineBool||!(mainBool||pointUnderLineBool)) {
-                    measure = 360 - measure;
-                }
+    //             let mainBool = tester.x <= 0 && tester.y > 0 || tester.x < 0;
+    //             let pointUnderLineBool = pointUnderLine(points2D[j], tester);
+    //             if(pointUnderLineBool||!(mainBool||pointUnderLineBool)) {
+    //                 measure = 360 - measure;
+    //             }
 
-                if(measure <= 180) {break}
+    //             console.log(measure);
 
-                endRound = false;
+    //             if(measure <= 180) {break}
+    //             endRound = false;
 
-                if(j == points2D.length - 1) {
-                    listOuterPoints.push(i);
-                    currentPoint++;
-                }
+    //             if(j == points2D.length - 1) {
+    //                 listOuterPoints.push(i);
+    //                 currentPoint++;
+    //             }
+    //         }
+    //     }
+    //     break;
+    //     if(endRound) {break}
+    // }
+
+    for(let i = 0;i<listOuterPoints.length;i++) {
+        let checkPoint = new Vector2D(2 * points2D[listOuterPoints[i]].x - averagePoint.x, 2 * points2D[listOuterPoints[i]].y - averagePoint.y);
+
+        let smallestAngle = 360;
+        let smallestAnglePoint = listOuterPoints[i];
+        
+        for(let j = 0;j<points2D.length;j++) {
+            if(j==listOuterPoints[i]) {continue}
+
+            let measure = calculateAngle(checkPoint, points2D[listOuterPoints[i]], points2D[j]);
+            let slope = new Vector2D(points2D[listOuterPoints[i]].x - checkPoint.x, points2D[listOuterPoints[i]].y - checkPoint.y);
+
+            //let mainBool = tester.x <= 0 && tester.y > 0 || tester.x < 0;
+            let pointUnderLineBool = pointUnderLine(points2D[j], slope, checkPoint);
+            if(pointUnderLineBool) {
+                console.log("yes");
+                measure = 360 - measure;
+            }
+
+            console.log(measure);
+
+            if(smallestAngle>measure) {
+                smallestAngle = measure;
+                smallestAnglePoint = j;
             }
         }
-        
-        if(endRound) {break}
+        console.log("");
+
+        if(!regularContains(listOuterPoints, smallestAnglePoint)) {
+            listOuterPoints.push(smallestAnglePoint);
+        }
     }
 
-    return listOuterPoints;
+    let returnPoints = [];
+    
+    for(let i = 0;i<listOuterPoints.length;i++) {
+        returnPoints.push(points2D[listOuterPoints[i]]);
+    }
+
+    return returnPoints;
 }
 
 function convertPoints2D(points3D, direction) {
@@ -118,7 +164,16 @@ function removeCopies(pointList) {
 
 function contains(pointList, item) {
     for(let i = 0;i<pointList.length;i++) {
-        if(pointList[i] == item) {
+        if(pointList[i].x == item.x && pointList[i].y == item.y) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function regularContains(list, item) {
+    for(let i = 0;i<list.length;i++) {
+        if(list[i] == item) {
             return true;
         }
     }
@@ -132,12 +187,29 @@ function calculateAngle(point1, point2, point3) {
 
     let angle = Math.acos((a*a + b*b - c*c) / (2 * a * b));
     
-    return angle;
+    return angle * 180 / Math.PI;
 }
 
-function pointUnderLine(point, line) {
-    if(line.x==0){return point.x < 0}
-    if(point.x==0){return point.y < 0}
+function pointUnderLine(point, slope, linePoint) {
+    if(slope.x==0){return point.x < 0}
 
-    return  line.y/line.x*point.x>point.y;
+    return  slope.y / slope.x * (linePoint.x - point.x) < linePoint.y - point.y;
 }
+
+function genCube(x, y, z, size) {
+    let points = [];
+    points.push(new Vector3D(x-size/2, y-size/2, z-size/2));
+    points.push(new Vector3D(x-size/2, y-size/2, z+size/2));
+    points.push(new Vector3D(x-size/2, y+size/2, z+size/2));
+    points.push(new Vector3D(x+size/2, y+size/2, z+size/2));
+    points.push(new Vector3D(x+size/2, y+size/2, z-size/2));
+    points.push(new Vector3D(x+size/2, y-size/2, z-size/2));
+    points.push(new Vector3D(x-size/2, y+size/2, z-size/2));
+    points.push(new Vector3D(x+size/2, y-size/2, z+size/2));
+    return points;
+}
+
+let shapePoints = new Shape3D(genCube(100, 100, 100, 100));
+
+let newPoints = definePolygon2D(shapePoints, 0);
+console.log(newPoints);
