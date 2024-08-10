@@ -188,7 +188,7 @@ function lineToLineCollision(start, end, start2, end2) {
     let uA = ((end2.x-start2.x) * (start.y-start2.y) - (end2.y-start2.y) * (start.x-start2.x)) / ((end2.y-start2.y) * (end.x-start.x) - (end2.x-start2.x) * (end.y-start.y));
     let uB = ((end.x-start.x) * (start.y-start2.y) - (end.y-start.y) * (start.x-start2.x)) / ((end2.y-start2.y) * (end.x-start.x) - (end2.x-start2.x) * (end.y-start.y));
 
-    if(UA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+    if(uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
         return true;
     }
     return false;
@@ -196,28 +196,43 @@ function lineToLineCollision(start, end, start2, end2) {
 
 let shapePoints = new Shape3D(genCube(100, 100, 100, 100));
 
-// mainCanvas.addEventListener("click", function(event) {
-//     let rect = mainCanvas.getBoundingClientRect();
-//     let mouse = new Vector2D(event.clientX - rect.left, event.clientY - rect.top);
+mainCanvas.addEventListener("click", function(event) {
+    let rect = mainCanvas.getBoundingClientRect();
+    let mouse = new Vector2D(event.clientX - rect.left, event.clientY - rect.top);
     
-//     shapePoints.points.push(new Vector3D(mouse.x, mouse.y, 0));
-//     let newPoints = definePolygon2D(shapePoints, 0);
+    shapePoints.points.push(new Vector3D(mouse.x, mouse.y, 0));
+});
 
-//     paint.fillStyle = "white";
-//     paint.fillRect(0, 0, 1600, 1600);
+mainCanvas.addEventListener("mousemove", function(event) {
+    let rect = mainCanvas.getBoundingClientRect();
+    let mouse = new Vector2D(event.clientX - rect.left, event.clientY - rect.top);
 
-//     paint.fillStyle = "black";
-//     for(let i = 0;i<shapePoints.points.length;i++) {
-//         paint.beginPath();
-//         paint.arc(shapePoints.points[i].x, shapePoints.points[i].y, 5, 0, 2 * Math.PI);
-//         paint.fill();
-//     }
+    let newPoints = definePolygon2D(shapePoints, 0);
 
-//     paint.beginPath();
-//     paint.moveTo(newPoints[0].x, newPoints[0].y);
-//     for(let i = 1;i<newPoints.length;i++) {
-//         paint.lineTo(newPoints[i].x, newPoints[i].y);
-//     }
-//     paint.lineTo(newPoints[0].x, newPoints[0].y);
-//     paint.stroke();
-// });
+    paint.fillStyle = "white";
+    paint.fillRect(0, 0, 1600, 1600);
+
+    paint.fillStyle = "black";
+    for(let i = 0;i<shapePoints.points.length;i++) {
+        paint.beginPath();
+        paint.arc(shapePoints.points[i].x, shapePoints.points[i].y, 5, 0, 2 * Math.PI);
+        paint.fill();
+    }
+
+    paint.beginPath();
+    paint.moveTo(newPoints[0].x, newPoints[0].y);
+    for(let i = 1;i<newPoints.length;i++) {
+        paint.lineTo(newPoints[i].x, newPoints[i].y);
+    }
+    paint.lineTo(newPoints[0].x, newPoints[0].y);
+    if(polygonLineCollision(newPoints, new Vector2D(800, 450), mouse)) {
+        paint.fill();
+    } else {
+        paint.stroke();
+    }
+
+    paint.beginPath();
+    paint.moveTo(800, 450);
+    paint.lineTo(mouse.x, mouse.y);
+    paint.stroke();
+});
